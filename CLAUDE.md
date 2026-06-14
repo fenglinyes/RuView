@@ -10,9 +10,9 @@ Dual codebase: Python v1 (`v1/`) and Rust port (`v2/`).
 | `wifi-densepose-core` | Core types, traits, error types, CSI frame primitives |
 | `wifi-densepose-signal` | SOTA signal processing + RuvSense multistatic sensing (16 modules) |
 | `wifi-densepose-nn` | Neural network inference (ONNX, PyTorch, Candle backends) |
-| `wifi-densepose-train` | Training pipeline with ruvector integration + ruview_metrics |
+| `wifi-densepose-train` | Training pipeline with ruvector integration + ruview_metrics; MAE pretraining recipe (`mae.rs`, ADR-152 §2.3) + WiFlow-STD port (`wiflow_std/`, tch-gated) |
 | `wifi-densepose-mat` | Mass Casualty Assessment Tool — disaster survivor detection |
-| `wifi-densepose-hardware` | ESP32 aggregator, TDM protocol, channel hopping firmware |
+| `wifi-densepose-hardware` | ESP32 aggregator, TDM protocol, channel hopping firmware; `ieee80211bf/` 802.11bf forward-compat protocol model (ADR-153) |
 | `wifi-densepose-ruvector` | RuVector v2.0.4 integration + cross-viewpoint fusion (5 modules) |
 | `wifi-densepose-wasm` | WebAssembly bindings for browser deployment |
 | `wifi-densepose-cli` | CLI tool (`wifi-densepose` binary) — `calibrate`/`calibrate-serve`/`enroll`/`train-room`/`room-watch` + MAT (MAT gated behind the `mat` feature; build `--no-default-features` for the aarch64/appliance calibration binary) |
@@ -22,6 +22,7 @@ Dual codebase: Python v1 (`v1/`) and Rust port (`v2/`).
 | `wifi-densepose-vitals` | ESP32 CSI-grade vital sign extraction (ADR-021) |
 | `nvsim` | Deterministic NV-diamond magnetometer pipeline simulator (ADR-089) — standalone leaf, WASM-ready |
 | `vendor/rvcsi` (submodule) | **rvCSI** — edge RF sensing runtime (ADR-095/096): 9 crates (`rvcsi-core`/`-dsp`/`-events`/`-adapter-file`/`-adapter-nexmon`/`-ruvector`/`-runtime`/`-node`/`-cli`). Lives in its own repo ([github.com/ruvnet/rvcsi](https://github.com/ruvnet/rvcsi)), vendored here under `vendor/rvcsi`, published to crates.io as `rvcsi-* 0.3.x` and to npm as `@ruv/rvcsi`. Not a `v2/` workspace member — depend on the published crates (or the submodule's `crates/rvcsi-*` paths). Normalized `CsiFrame`/`CsiWindow`/`CsiEvent` schema, validate-before-FFI, reusable DSP, typed confidence-scored events, the napi-c Nexmon shim (real nexmon_csi `.pcap` from a Raspberry Pi 5 / 4 / 3B+ — BCM43455c0), the napi-rs SDK, the `rvcsi` CLI, a Claude Code plugin. |
+| `vendor/rufield` (submodule) | **RuField MFS** — the open spec for camera-free multimodal field sensing (ADR-260). A common `FieldEvent`/`FieldTensor`/`FusionGraph`/`PrivacyClass`/`ProvenanceReceipt` model *above* WiFi CSI/CIR/BFLD, UWB, BLE Channel Sounding, mmWave radar, ultrasound, subsonic, infrared, and quantum sensors. Lives in its own repo ([github.com/ruvnet/rufield](https://github.com/ruvnet/rufield)), vendored here under `vendor/rufield`. Not a `v2/` workspace member. v0.1 reference stack = 7 crates (`rufield-core`/`-provenance`/`-privacy`/`-adapters`/`-fusion`/`-bench`/`-viewer`), 72 tests/0 failed; `rufield-viewer` is an Axum + vanilla-JS read-only dashboard (`cargo run -p rufield-viewer`) completing ADR-260 §27.9. All benchmark metrics are **SYNTHETIC** (simulator ground truth, no hardware — real adapters are roadmap). |
 | `ruview-swarm` | Drone swarm control system (ADR-148) — hierarchical-mesh topology, Raft consensus, MARL, CSI sensing payload, MAVLink/PX4 compat, Ruflo AI-agent integration |
 
 ### RuvSense Modules (`signal/src/ruvsense/`)
@@ -73,6 +74,8 @@ All 5 ruvector crates integrated in workspace:
 - ADR-031: RuView sensing-first RF mode (Proposed)
 - ADR-032: Multistatic mesh security hardening (Proposed)
 - ADR-148: Drone swarm control system / `ruview-swarm` (In Progress)
+- ADR-152: WiFi-Pose SOTA 2026 intake — geometry conditioning, WiFlow-STD benchmark (measurement (a) complete: claims MEASURED-EQUIVALENT at ~96% PCK@20), MAE recipe (Proposed; §2.1–2.3, 2.6 implemented)
+- ADR-153: IEEE 802.11bf-2025 forward-compatibility protocol model (Accepted — amends ADR-152 §2.4)
 
 ### Supported Hardware
 
